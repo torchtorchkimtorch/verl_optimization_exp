@@ -1051,6 +1051,8 @@ class RayPPOTrainer:
             experiment_name=self.config.trainer.experiment_name,
             default_backend=self.config.trainer.logger,
             config=OmegaConf.to_container(self.config, resolve=True),
+            enable_gpu_monitoring=getattr(self.config.trainer, 'enable_gpu_monitoring', False),
+            gpu_monitor_interval=getattr(self.config.trainer, 'gpu_monitor_interval', 1.0),
         )
 
         self.global_steps = 0

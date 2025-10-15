@@ -36,7 +36,8 @@ class Tracking:
 
     supported_backend = ["wandb", "mlflow", "swanlab", "vemlp_wandb", "tensorboard", "console", "clearml", "trackio"]
 
-    def __init__(self, project_name, experiment_name, default_backend: str | list[str] = "console", config=None):
+    def __init__(self, project_name, experiment_name, default_backend: str | list[str] = "console", config=None,
+                 enable_gpu_monitoring: bool = False, gpu_monitor_interval: float = 1.0):
         if isinstance(default_backend, str):
             default_backend = [default_backend]
         for backend in default_backend:
@@ -48,6 +49,8 @@ class Tracking:
                 assert backend in self.supported_backend, f"{backend} is not supported"
 
         self.logger = {}
+        self.enable_gpu_monitoring = enable_gpu_monitoring
+        self.gpu_monitor = None
 
         if "tracking" in default_backend or "wandb" in default_backend:
             import wandb
@@ -133,12 +136,36 @@ class Tracking:
         if "clearml" in default_backend:
             self.logger["clearml"] = ClearMLLogger(project_name, experiment_name, config)
 
+        # Initialize GPU monitoring if enabled
+        if self.enable_gpu_monitoring and ("wandb" in default_backend or "vemlp_wandb" in default_backend):
+            try:
+                from verl.utils.gpu_monitor import start_gpu_monitoring
+                self.gpu_monitor = start_gpu_monitoring(
+                    monitor_interval=gpu_monitor_interval,
+                    log_to_wandb=True,
+                    log_to_console=False
+                )
+            except ImportError as e:
+                import warnings
+                warnings.warn(f"Failed to import GPU monitoring: {e}. Install pynvml and psutil for full GPU monitoring.")
+            except Exception as e:
+                import warnings
+                warnings.warn(f"Failed to start GPU monitoring: {e}")
+
     def log(self, data, step, backend=None):
         for default_backend, logger_instance in self.logger.items():
             if backend is None or default_backend in backend:
                 logger_instance.log(data=data, step=step)
 
     def __del__(self):
+        # Stop GPU monitoring
+        if self.gpu_monitor is not None:
+            try:
+                from verl.utils.gpu_monitor import stop_gpu_monitoring
+                stop_gpu_monitoring()
+            except:
+                pass
+
         if "wandb" in self.logger:
             self.logger["wandb"].finish(exit_code=0)
         if "swanlab" in self.logger:

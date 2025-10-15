@@ -1,0 +1,3 @@
+pip uninstall flash-attn -y
+# PyTorch 2.6.0에 맞는 버전 설치
+pip install flash-attn==2.6.3 --no-build-isolation
