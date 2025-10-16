@@ -111,7 +111,7 @@ class StandaloneGPUMonitor:
         summary = []
         summary.append(f"📊 Monitoring Summary (Total samples: {len(history)})")
         summary.append("=" * 50)
-        
+
         for device_id in self.monitor.device_ids:
             gpu_util = latest.get(f'gpu_{device_id}_gpu_utilization_pct', 0)
             mem_util = latest.get(f'gpu_{device_id}_memory_utilization_pct', 0)
@@ -119,7 +119,7 @@ class StandaloneGPUMonitor:
             mem_total = latest.get(f'gpu_{device_id}_memory_total_gb', 0)
             temp = latest.get(f'gpu_{device_id}_temperature_c', 0)
             power = latest.get(f'gpu_{device_id}_power_usage_w', 0)
-            
+
             summary.append(f"GPU {device_id}:")
             summary.append(f"  🔥 Utilization: {gpu_util:.1f}%")
             summary.append(f"  💾 Memory: {mem_used:.1f}/{mem_total:.1f} GB ({mem_util:.1f}%)")
@@ -128,7 +128,21 @@ class StandaloneGPUMonitor:
             if power > 0:
                 summary.append(f"  ⚡ Power: {power:.1f}W")
             summary.append("")
-        
+
+        # Add system metrics
+        sys_mem_util = latest.get('system_memory_utilization_pct', 0)
+        sys_mem_util_psutil = latest.get('system_memory_utilization_psutil_pct', 0)
+        sys_mem_used = latest.get('system_memory_used_gb', 0)
+        sys_mem_total = latest.get('system_memory_total_gb', 0)
+        sys_mem_available = latest.get('system_memory_available_gb', 0)
+        cpu_util = latest.get('cpu_utilization_pct', 0)
+
+        summary.append("System:")
+        summary.append(f"  🖥️  CPU Utilization: {cpu_util:.1f}%")
+        summary.append(f"  💾 Memory: {sys_mem_used:.1f}/{sys_mem_total:.1f} GB ({sys_mem_util:.1f}%)")
+        summary.append(f"  💾 Memory (psutil): {sys_mem_util_psutil:.1f}%")
+        summary.append(f"  💾 Available: {sys_mem_available:.1f} GB")
+
         return "\n".join(summary)
 
 

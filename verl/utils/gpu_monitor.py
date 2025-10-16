@@ -162,13 +162,20 @@ class GPUResourceMonitor:
             try:
                 # CPU usage
                 metrics['cpu_utilization_pct'] = psutil.cpu_percent(interval=None)
-                
+
                 # Memory usage
                 memory = psutil.virtual_memory()
                 metrics['system_memory_used_gb'] = memory.used / (1024**3)
                 metrics['system_memory_total_gb'] = memory.total / (1024**3)
-                metrics['system_memory_utilization_pct'] = memory.percent
-                
+                metrics['system_memory_available_gb'] = memory.available / (1024**3)
+
+                # Calculate utilization percentage manually for consistency
+                # Using (total - available) / total * 100 for more accurate representation
+                metrics['system_memory_utilization_pct'] = ((memory.total - memory.available) / memory.total) * 100
+
+                # Also provide psutil's built-in percent for comparison
+                metrics['system_memory_utilization_psutil_pct'] = memory.percent
+
             except Exception as e:
                 logger.warning(f"Failed to get system metrics: {e}")
         
@@ -224,8 +231,13 @@ class GPUResourceMonitor:
         try:
             import wandb
             if wandb.run is not None:
-                # Remove timestamp for wandb logging
+                # Remove timestamp for wandb logging but keep all other metrics
                 wandb_metrics = {k: v for k, v in metrics.items() if k != 'timestamp'}
+
+                # Add a step timestamp for better correlation
+                import time
+                wandb_metrics['monitor_timestamp'] = time.time()
+
                 wandb.log(wandb_metrics)
         except Exception as e:
             logger.warning(f"Failed to log to wandb: {e}")
