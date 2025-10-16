@@ -109,39 +109,36 @@ class StandaloneGPUMonitor:
         
         latest = history[-1]
         summary = []
-        summary.append(f"📊 Monitoring Summary (Total samples: {len(history)})")
-        summary.append("=" * 50)
+        summary.append(f"🔥 GPU Utilization Summary (Total samples: {len(history)})")
+        summary.append("=" * 60)
 
+        # GPU-focused summary
         for device_id in self.monitor.device_ids:
             gpu_util = latest.get(f'gpu_{device_id}_gpu_utilization_pct', 0)
             mem_util = latest.get(f'gpu_{device_id}_memory_utilization_pct', 0)
-            mem_used = latest.get(f'gpu_{device_id}_memory_allocated_gb', 0)
-            mem_total = latest.get(f'gpu_{device_id}_memory_total_gb', 0)
+            mem_used_nvml = latest.get(f'gpu_{device_id}_memory_used_nvml_gb', 0)
+            mem_total_nvml = latest.get(f'gpu_{device_id}_memory_total_nvml_gb', 0)
             temp = latest.get(f'gpu_{device_id}_temperature_c', 0)
             power = latest.get(f'gpu_{device_id}_power_usage_w', 0)
+            graphics_clock = latest.get(f'gpu_{device_id}_graphics_clock_mhz', 0)
 
-            summary.append(f"GPU {device_id}:")
-            summary.append(f"  🔥 Utilization: {gpu_util:.1f}%")
-            summary.append(f"  💾 Memory: {mem_used:.1f}/{mem_total:.1f} GB ({mem_util:.1f}%)")
+            summary.append(f"🎯 GPU {device_id}: {gpu_util:5.1f}% utilization")
+            if mem_util > 0 and mem_total_nvml > 0:
+                summary.append(f"   💾 Memory: {mem_used_nvml:.1f}/{mem_total_nvml:.1f} GB ({mem_util:.1f}%)")
             if temp > 0:
-                summary.append(f"  🌡️  Temperature: {temp:.1f}°C")
+                summary.append(f"   🌡️  Temperature: {temp:.0f}°C")
             if power > 0:
-                summary.append(f"  ⚡ Power: {power:.1f}W")
+                summary.append(f"   ⚡ Power: {power:.0f}W")
+            if graphics_clock > 0:
+                summary.append(f"   ⚙️  Clock: {graphics_clock:.0f} MHz")
             summary.append("")
 
-        # Add system metrics
-        sys_mem_util = latest.get('system_memory_utilization_pct', 0)
-        sys_mem_util_psutil = latest.get('system_memory_utilization_psutil_pct', 0)
-        sys_mem_used = latest.get('system_memory_used_gb', 0)
-        sys_mem_total = latest.get('system_memory_total_gb', 0)
-        sys_mem_available = latest.get('system_memory_available_gb', 0)
+        # Add minimal system metrics
         cpu_util = latest.get('cpu_utilization_pct', 0)
+        sys_mem_util = latest.get('system_memory_utilization_pct', 0)
 
-        summary.append("System:")
-        summary.append(f"  🖥️  CPU Utilization: {cpu_util:.1f}%")
-        summary.append(f"  💾 Memory: {sys_mem_used:.1f}/{sys_mem_total:.1f} GB ({sys_mem_util:.1f}%)")
-        summary.append(f"  💾 Memory (psutil): {sys_mem_util_psutil:.1f}%")
-        summary.append(f"  💾 Available: {sys_mem_available:.1f} GB")
+        summary.append("📊 System:")
+        summary.append(f"   🖥️  CPU: {cpu_util:.1f}% | System RAM: {sys_mem_util:.1f}%")
 
         return "\n".join(summary)
 

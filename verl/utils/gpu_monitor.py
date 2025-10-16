@@ -101,12 +101,13 @@ class GPUResourceMonitor:
                 total_memory = torch.cuda.get_device_properties(device_id).total_memory
                 allocated_memory = torch.cuda.memory_allocated(device_id)
                 reserved_memory = torch.cuda.memory_reserved(device_id)
-                
+
                 metrics.update({
                     'memory_allocated_gb': allocated_memory / (1024**3),
                     'memory_reserved_gb': reserved_memory / (1024**3),
                     'memory_total_gb': total_memory / (1024**3),
-                    'memory_utilization_pct': (allocated_memory / total_memory) * 100,
+                    'memory_utilization_pytorch_pct': (allocated_memory / total_memory) * 100,
+                    'memory_utilization_reserved_pct': (reserved_memory / total_memory) * 100,
                 })
         except Exception as e:
             logger.warning(f"Failed to get PyTorch metrics for GPU {device_id}: {e}")
@@ -121,10 +122,13 @@ class GPUResourceMonitor:
                 metrics['gpu_utilization_pct'] = util.gpu
                 metrics['memory_utilization_nvml_pct'] = util.memory
                 
-                # Memory info from NVML
+                # Memory info from NVML (this matches nvitop)
                 mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
                 metrics['memory_used_nvml_gb'] = mem_info.used / (1024**3)
                 metrics['memory_free_nvml_gb'] = mem_info.free / (1024**3)
+                metrics['memory_total_nvml_gb'] = mem_info.total / (1024**3)
+                # This should match nvitop's memory percentage
+                metrics['memory_utilization_pct'] = (mem_info.used / mem_info.total) * 100
                 
                 # Temperature
                 try:
@@ -217,14 +221,26 @@ class GPUResourceMonitor:
             time.sleep(self.monitor_interval)
     
     def _log_to_console(self, metrics: Dict[str, float]):
-        """Log metrics to console."""
+        """Log metrics to console with focus on GPU utilization."""
         gpu_summary = []
         for device_id in self.device_ids:
             gpu_util = metrics.get(f'gpu_{device_id}_gpu_utilization_pct', 0)
             mem_util = metrics.get(f'gpu_{device_id}_memory_utilization_pct', 0)
-            gpu_summary.append(f"GPU{device_id}: {gpu_util:.1f}%/{mem_util:.1f}%")
-        
-        logger.info(f"GPU Monitor - {' | '.join(gpu_summary)}")
+            temp = metrics.get(f'gpu_{device_id}_temperature_c', 0)
+            power = metrics.get(f'gpu_{device_id}_power_usage_w', 0)
+
+            # Focus on GPU utilization with additional key metrics
+            gpu_info = f"GPU{device_id}: {gpu_util:5.1f}% util"
+            if mem_util > 0:
+                gpu_info += f" | {mem_util:5.1f}% mem"
+            if temp > 0:
+                gpu_info += f" | {temp:3.0f}°C"
+            if power > 0:
+                gpu_info += f" | {power:3.0f}W"
+
+            gpu_summary.append(gpu_info)
+
+        logger.info(f"🔥 GPU Status: {' | '.join(gpu_summary)}")
     
     def _log_to_wandb(self, metrics: Dict[str, float]):
         """Log metrics to wandb."""

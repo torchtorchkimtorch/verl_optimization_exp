@@ -60,12 +60,12 @@ def test_monitoring():
     initial_metrics = monitor.get_latest_metrics()
     if initial_metrics:
         print("✓ Successfully collected initial metrics")
-        print(f"  GPU 0 utilization: {initial_metrics.get('gpu_0_gpu_utilization_pct', 'N/A')}%")
-        print(f"  GPU 0 memory: {initial_metrics.get('gpu_0_memory_allocated_gb', 'N/A')} GB")
-        print(f"  System memory utilization: {initial_metrics.get('system_memory_utilization_pct', 'N/A'):.1f}%")
-        print(f"  System memory utilization (psutil): {initial_metrics.get('system_memory_utilization_psutil_pct', 'N/A'):.1f}%")
-        print(f"  System memory used: {initial_metrics.get('system_memory_used_gb', 'N/A'):.1f} GB")
-        print(f"  System memory available: {initial_metrics.get('system_memory_available_gb', 'N/A'):.1f} GB")
+        print(f"  🔥 GPU 0 utilization: {initial_metrics.get('gpu_0_gpu_utilization_pct', 'N/A')}%")
+        print(f"  💾 GPU 0 memory (PyTorch): {initial_metrics.get('gpu_0_memory_allocated_gb', 'N/A')} GB")
+        print(f"  💾 GPU 0 memory (NVML): {initial_metrics.get('gpu_0_memory_utilization_pct', 'N/A'):.1f}%")
+        print(f"  🌡️  GPU 0 temperature: {initial_metrics.get('gpu_0_temperature_c', 'N/A')}°C")
+        print(f"  ⚡ GPU 0 power: {initial_metrics.get('gpu_0_power_usage_w', 'N/A')}W")
+        print(f"  🖥️  System: CPU {initial_metrics.get('cpu_utilization_pct', 'N/A'):.1f}% | RAM {initial_metrics.get('system_memory_utilization_pct', 'N/A'):.1f}%")
     else:
         print("❌ Failed to collect initial metrics")
         monitor.stop_monitoring()
@@ -85,8 +85,9 @@ def test_monitoring():
         final_metrics = monitor.get_latest_metrics()
         if final_metrics:
             print("✓ Successfully collected metrics during load")
-            print(f"  GPU 0 utilization: {final_metrics.get('gpu_0_gpu_utilization_pct', 'N/A')}%")
-            print(f"  GPU 0 memory: {final_metrics.get('gpu_0_memory_allocated_gb', 'N/A')} GB")
+            print(f"  🔥 GPU 0 utilization: {final_metrics.get('gpu_0_gpu_utilization_pct', 'N/A')}%")
+            print(f"  💾 GPU 0 memory (PyTorch): {final_metrics.get('gpu_0_memory_allocated_gb', 'N/A')} GB")
+            print(f"  💾 GPU 0 memory (NVML): {final_metrics.get('gpu_0_memory_utilization_pct', 'N/A'):.1f}%")
         
     monitor.stop_monitoring()
     
