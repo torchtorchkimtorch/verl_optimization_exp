@@ -2,6 +2,8 @@
 
 이 문서는 VERL 훈련 중 GPU 리소스 사용량을 실시간으로 모니터링하고 WandB에서 시각화하는 방법을 설명합니다.
 
+verl 0.5.0 버전으로 개발되었으며, 설치 시작 시에는 [![Documentation](https://img.shields.io/badge/documentation-blue)](https://verl.readthedocs.io/en/latest/) 를 참고하세요. 
+
 ## 빠른 시작
 
 ### 1. 필수 패키지 설치
@@ -170,11 +172,6 @@ logger = Tracking(
 2. **메모리 사용량**: 장시간 모니터링 시 메트릭 히스토리가 메모리를 사용합니다.
 
 3. **권한**: NVML 기능을 사용하려면 적절한 GPU 드라이버와 권한이 필요합니다.
-
-4. **의존성**: 
-   - `pynvml`: NVIDIA GPU 세부 정보 (온도, 전력 등)
-   - `psutil`: 시스템 리소스 정보
-   - `wandb`: WandB 로깅 (선택사항)
 
 ## 문제 해결
 
