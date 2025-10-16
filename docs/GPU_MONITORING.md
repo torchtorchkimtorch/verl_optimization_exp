@@ -2,7 +2,7 @@
 
 이 문서는 VERL 훈련 중 GPU 리소스 사용량을 실시간으로 모니터링하고 WandB에서 시각화하는 방법을 설명합니다.
 
-## 🚀 빠른 시작
+## 빠른 시작
 
 ### 1. 필수 패키지 설치
 
@@ -21,7 +21,7 @@ python3 -m verl.trainer.main_ppo \
     +trainer.gpu_monitor_interval=2.0
 ```
 
-## 📊 모니터링되는 메트릭
+## 모니터링되는 메트릭
 
 ### GPU 메트릭 (각 GPU별)
 - **GPU 사용률** (`gpu_N_gpu_utilization_pct`): GPU 코어 사용률 (%)
@@ -37,7 +37,7 @@ python3 -m verl.trainer.main_ppo \
 - **CPU 사용률** (`cpu_utilization_pct`): CPU 사용률 (%)
 - **시스템 메모리** (`system_memory_used_gb`, `system_memory_utilization_pct`): 시스템 RAM 사용량
 
-## 🛠️ 사용 방법
+## 사용 방법
 
 ### 방법 1: 훈련과 통합된 모니터링 (권장)
 
@@ -92,7 +92,7 @@ python scripts/monitor_gpu_realtime.py \
 - `--no-console`: 콘솔 출력 비활성화
 - `--summary-interval`: 요약 출력 간격 (초)
 
-## 📈 WandB에서 시각화
+## WandB에서 시각화
 
 WandB 대시보드에서 다음과 같은 차트를 만들 수 있습니다:
 
@@ -120,7 +120,7 @@ Y축: gpu_0_power_usage_w, gpu_1_power_usage_w, ...
 X축: Step
 ```
 
-## 🔧 고급 사용법
+## 고급 사용법
 
 ### 커스텀 모니터링 구현
 
@@ -163,7 +163,7 @@ logger = Tracking(
 # 이후 logger.log() 호출 시 GPU 메트릭도 자동으로 로깅됨
 ```
 
-## 🚨 주의사항
+## 주의사항
 
 1. **성능 영향**: 모니터링 간격이 너무 짧으면 (< 0.5초) 훈련 성능에 영향을 줄 수 있습니다.
 
@@ -176,7 +176,7 @@ logger = Tracking(
    - `psutil`: 시스템 리소스 정보
    - `wandb`: WandB 로깅 (선택사항)
 
-## 🐛 문제 해결
+## 문제 해결
 
 ### 일반적인 문제들
 
@@ -201,15 +201,15 @@ logger = Tracking(
    - 모니터링 간격을 늘리거나 (`gpu_monitor_interval` 증가)
    - 메트릭 히스토리 제한 설정
 
-## 📝 예제 출력
+## 예제 출력
 
 콘솔 출력 예제:
 ```
-🚀 Starting GPU monitoring...
-📊 Monitoring interval: 1.0s
-🖥️  Monitoring GPUs: [0, 1, 2, 3, 4, 5, 6, 7]
-📈 WandB logging: ✓
-🖨️  Console output: ✓
+Starting GPU monitoring...
+Monitoring interval: 1.0s
+Monitoring GPUs: [0, 1, 2, 3, 4, 5, 6, 7]
+WandB logging: ✓
+Console output: ✓
 
 GPU Monitor - GPU0: 85.2%/76.3% | GPU1: 82.1%/74.8% | GPU2: 88.5%/78.2% | GPU3: 84.7%/75.9%
 ```
